@@ -33,10 +33,11 @@ def weather_fit(p, wx):
 
 def pref_fit(p, prof):
     s = 0.0
-    # 활동성 선호도로 실내/실외 선호도 대체
-    outdoor_pref = float(prof["active_level"] or 0.5)  # 활동성이 높을수록 실외 선호
+    
+    # 활동성/실내외 선호도
+    active_level = float(prof["active_level"])
     indoor = int(p["indoor"]) == 1
-    s += (outdoor_pref if not indoor else (1-outdoor_pref)) * 0.2
+    s += (active_level if not indoor else (1-active_level)) * 0.2
 
     # 성격 유형 점수
     if prof["personality_type"] == "extrovert" and p["extrovert_friendly"] == "yes":
@@ -45,10 +46,10 @@ def pref_fit(p, prof):
         s += 0.15
 
     # 기존 선호도 점수
-    s += (int(p["romantic"])/5.0) * float(prof["romantic_pref"] or 0) * 0.3
-    s += (1 - abs((int(p["noise"])-1)/4.0 - float(prof["noise_pref"] or 0))) * 0.15
-    s += (1 - abs(int(p["budget_level"]) - float(prof["budget_pref"] or 2))/4.0) * 0.1
-    s += (int(p["walk_score"])/5.0) * min(1.0, float(prof["walk_limit_km"] or 1)/3.0) * 0.15
+    s += (int(p["romantic"])/5.0) * float(prof["romantic_pref"]) * 0.3
+    s += (1 - abs((int(p["noise"])-1)/4.0 - float(prof["noise_pref"]))) * 0.15
+    s += (1 - abs(int(p["budget_level"]) - float(prof["budget_pref"]))/4.0) * 0.1
+    s += (int(p["walk_score"])/5.0) * min(1.0, float(prof["walk_limit_km"])/3.0) * 0.15
 
     # 장소 유형 보너스
     if p["type"] in ["park","cafe","museum","trail","viewpoint","heritage","street","market"]:
