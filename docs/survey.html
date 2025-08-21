@@ -108,7 +108,7 @@
 
             <div class="form-group">
                 <label for="active">활동성 선호도</label>
-                <input type="range" id="active" name="active" min="0" max="100" step="10">
+                <input type="range" id="active" name="active" min="0" max="100" step="10" value="50">
                 <div class="range-labels">
                     <span>조용한 활동 선호</span>
                     <span>활동적인 것 선호</span>
@@ -117,7 +117,7 @@
 
             <div class="form-group">
                 <label for="noise">소음 레벨 선호도</label>
-                <input type="range" id="noise" name="noise" min="0" max="100" step="10">
+                <input type="range" id="noise" name="noise" min="0" max="100" step="10" value="50">
                 <div class="range-labels">
                     <span>조용한 곳</span>
                     <span>활기찬 곳</span>
@@ -126,7 +126,7 @@
 
             <div class="form-group">
                 <label for="romantic">로맨틱한 분위기 선호도</label>
-                <input type="range" id="romantic" name="romantic" min="0" max="100" step="10">
+                <input type="range" id="romantic" name="romantic" min="0" max="100" step="10" value="50">
                 <div class="range-labels">
                     <span>캐주얼</span>
                     <span>로맨틱</span>
@@ -162,6 +162,346 @@
     </div>
 
     <script>
+    // 장소 데이터
+    const PLACES = [
+        {
+            "place_id": "p001",
+            "name": "스타벅스 광화문점",
+            "type": "cafe",
+            "district": "종로구",
+            "indoor": 1,
+            "noise": 3,
+            "romantic": 2,
+            "budget_level": 2,
+            "walk_score": 1,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "프랜차이즈 작업 실내"
+        },
+        {
+            "place_id": "p002",
+            "name": "어니언 안국",
+            "type": "cafe",
+            "district": "종로구",
+            "indoor": 1,
+            "noise": 2,
+            "romantic": 3,
+            "budget_level": 3,
+            "walk_score": 2,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "베이커리 감성 데이트"
+        },
+        {
+            "place_id": "p003",
+            "name": "테라로사 한남",
+            "type": "cafe",
+            "district": "용산구",
+            "indoor": 1,
+            "noise": 3,
+            "romantic": 4,
+            "budget_level": 4,
+            "walk_score": 2,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "스페셜티 로맨틱"
+        },
+        {
+            "place_id": "p004",
+            "name": "북악스카이웨이 전망대",
+            "type": "viewpoint",
+            "district": "종로구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 5,
+            "budget_level": 1,
+            "walk_score": 4,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "야경 드라이브 로맨틱"
+        },
+        {
+            "place_id": "p005",
+            "name": "남산서울타워",
+            "type": "viewpoint",
+            "district": "중구",
+            "indoor": 0,
+            "noise": 4,
+            "romantic": 4,
+            "budget_level": 3,
+            "walk_score": 3,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "야경 관광명소"
+        },
+        {
+            "place_id": "p006",
+            "name": "서울숲",
+            "type": "park",
+            "district": "성동구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 3,
+            "budget_level": 1,
+            "walk_score": 5,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "산책 데이트 자연"
+        },
+        {
+            "place_id": "p007",
+            "name": "한강공원 뚝섬지구",
+            "type": "park",
+            "district": "광진구",
+            "indoor": 0,
+            "noise": 3,
+            "romantic": 3,
+            "budget_level": 1,
+            "walk_score": 5,
+            "alcohol_available": "yes",
+            "extrovert_friendly": "yes",
+            "tags": "자전거 피크닉 야외"
+        },
+        {
+            "place_id": "p008",
+            "name": "경복궁",
+            "type": "heritage",
+            "district": "종로구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 4,
+            "budget_level": 3,
+            "walk_score": 4,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "전통 역사 데이트"
+        },
+        {
+            "place_id": "p009",
+            "name": "롯데월드 아쿠아리움",
+            "type": "museum",
+            "district": "송파구",
+            "indoor": 1,
+            "noise": 3,
+            "romantic": 3,
+            "budget_level": 4,
+            "walk_score": 2,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "실내 데이트 동물"
+        },
+        {
+            "place_id": "p010",
+            "name": "국립현대미술관 서울",
+            "type": "museum",
+            "district": "종로구",
+            "indoor": 1,
+            "noise": 1,
+            "romantic": 3,
+            "budget_level": 2,
+            "walk_score": 3,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "예술 전시 조용"
+        },
+        {
+            "place_id": "p011",
+            "name": "코엑스 별마당도서관",
+            "type": "museum",
+            "district": "강남구",
+            "indoor": 1,
+            "noise": 3,
+            "romantic": 2,
+            "budget_level": 1,
+            "walk_score": 2,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "실내 포토존 무료"
+        },
+        {
+            "place_id": "p012",
+            "name": "동대문디자인플라자",
+            "type": "museum",
+            "district": "중구",
+            "indoor": 1,
+            "noise": 3,
+            "romantic": 3,
+            "budget_level": 3,
+            "walk_score": 3,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "전시 현대적"
+        },
+        {
+            "place_id": "p013",
+            "name": "홍대 걷고싶은거리",
+            "type": "street",
+            "district": "마포구",
+            "indoor": 0,
+            "noise": 5,
+            "romantic": 2,
+            "budget_level": 2,
+            "walk_score": 5,
+            "alcohol_available": "yes",
+            "extrovert_friendly": "yes",
+            "tags": "야외 활기 데이트"
+        },
+        {
+            "place_id": "p014",
+            "name": "이태원 경리단길",
+            "type": "street",
+            "district": "용산구",
+            "indoor": 0,
+            "noise": 4,
+            "romantic": 3,
+            "budget_level": 3,
+            "walk_score": 4,
+            "alcohol_available": "yes",
+            "extrovert_friendly": "yes",
+            "tags": "맛집 데이트 야간"
+        },
+        {
+            "place_id": "p015",
+            "name": "청계천",
+            "type": "trail",
+            "district": "종로구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 3,
+            "budget_level": 1,
+            "walk_score": 4,
+            "alcohol_available": "no",
+            "extrovert_friendly": "yes",
+            "tags": "산책 야간 데이트"
+        },
+        {
+            "place_id": "p016",
+            "name": "양재천 산책로",
+            "type": "trail",
+            "district": "서초구",
+            "indoor": 0,
+            "noise": 1,
+            "romantic": 4,
+            "budget_level": 1,
+            "walk_score": 5,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "조용 산책 연인"
+        },
+        {
+            "place_id": "p017",
+            "name": "서울식물원",
+            "type": "park",
+            "district": "강서구",
+            "indoor": 1,
+            "noise": 2,
+            "romantic": 3,
+            "budget_level": 2,
+            "walk_score": 4,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "자연 실내정원 데이트"
+        },
+        {
+            "place_id": "p018",
+            "name": "한옥마을 북촌",
+            "type": "heritage",
+            "district": "종로구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 4,
+            "budget_level": 2,
+            "walk_score": 4,
+            "alcohol_available": "no",
+            "extrovert_friendly": "no",
+            "tags": "전통 데이트 산책"
+        },
+        {
+            "place_id": "p019",
+            "name": "남대문시장",
+            "type": "market",
+            "district": "중구",
+            "indoor": 0,
+            "noise": 5,
+            "romantic": 2,
+            "budget_level": 1,
+            "walk_score": 3,
+            "alcohol_available": "yes",
+            "extrovert_friendly": "yes",
+            "tags": "시장 활기 저예산"
+        },
+        {
+            "place_id": "p020",
+            "name": "망원한강공원",
+            "type": "park",
+            "district": "마포구",
+            "indoor": 0,
+            "noise": 2,
+            "romantic": 4,
+            "budget_level": 1,
+            "walk_score": 5,
+            "alcohol_available": "yes",
+            "extrovert_friendly": "yes",
+            "tags": "산책 야경 데이트"
+        }
+    ];
+
+    function calculateMatchScore(place, prefs) {
+        let score = 0;
+        const weights = {
+            location: 0.15,
+            personality: 0.15,
+            drinking: 0.1,
+            active: 0.1,
+            noise: 0.1,
+            romantic: 0.15,
+            budget: 0.15,
+            walk: 0.1
+        };
+
+        // 위치 점수
+        if (place.district === prefs.district) {
+            score += weights.location;
+        }
+
+        // 성격 유형 점수
+        if (prefs.personality === 'extrovert' && place.extrovert_friendly === 'yes') {
+            score += weights.personality;
+        } else if (prefs.personality === 'introvert' && place.extrovert_friendly === 'no') {
+            score += weights.personality;
+        }
+
+        // 음주 가능 여부
+        if (prefs.drinking === 'yes' && place.alcohol_available === 'yes') {
+            score += weights.drinking;
+        } else if (prefs.drinking === 'no' && place.alcohol_available === 'no') {
+            score += weights.drinking;
+        }
+
+        // 활동성 점수
+        const activityScore = Math.abs(prefs.active - (place.noise / 5));
+        score += weights.active * (1 - activityScore);
+
+        // 소음 레벨 선호도
+        const noiseScore = Math.abs(prefs.noise - (place.noise / 5));
+        score += weights.noise * (1 - noiseScore);
+
+        // 로맨틱한 분위기 선호도
+        const romanticScore = Math.abs(prefs.romantic - (place.romantic / 5));
+        score += weights.romantic * (1 - romanticScore);
+
+        // 비용 선호도
+        const budgetScore = Math.abs(parseInt(prefs.budget) - place.budget_level);
+        score += weights.budget * (1 - budgetScore / 4);
+
+        // 도보 거리 선호도
+        if (place.walk_score <= parseInt(prefs.walk)) {
+            score += weights.walk;
+        }
+
+        return score;
+    }
+
     document.getElementById('surveyForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -181,33 +521,29 @@
         document.querySelector('button[type="submit"]').disabled = true;
         document.querySelector('button[type="submit"]').textContent = '추천 장소 찾는 중...';
 
-        // API 호출
-        fetch('http://localhost:5000/api/recommend', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // 결과를 localStorage에 저장
-                localStorage.setItem('recommendations', JSON.stringify(data.recommendations));
-                // 결과 페이지로 이동
-                window.location.href = 'results.html';
-            } else {
-                alert('추천을 가져오는데 실패했습니다. 다시 시도해주세요.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('오류가 발생했습니다. 다시 시도해주세요.');
-        })
-        .finally(() => {
-            document.querySelector('button[type="submit"]').disabled = false;
-            document.querySelector('button[type="submit"]').textContent = '추천 받기';
-        });
+        // 점수 계산
+        const scoredPlaces = PLACES.map(place => ({
+            ...place,
+            score: calculateMatchScore(place, formData)
+        }));
+
+        // 상위 5개 장소 선택
+        const recommendations = scoredPlaces
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5)
+            .map(place => ({
+                name: place.name,
+                type: place.type,
+                district: place.district,
+                score: Math.round(place.score * 100) / 100,
+                tags: place.tags,
+                indoor: place.indoor === 1,
+                budget_level: parseInt(place.budget_level)
+            }));
+
+        // 결과 저장 및 페이지 이동
+        localStorage.setItem('recommendations', JSON.stringify(recommendations));
+        window.location.href = 'results.html';
     });
     </script>
 </body>
