@@ -2,9 +2,14 @@
   "name": "weather-date-mvp",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel deploy"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }
