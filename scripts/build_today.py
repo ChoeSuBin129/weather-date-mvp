@@ -2,7 +2,7 @@ from datetime import date
 import json, os
 
 print("Creating posts directory...")
-os.makedirs("site/posts", exist_ok=True)
+os.makedirs("docs/posts", exist_ok=True)
 today = str(date.today())
 print("Today:", today)
 top3 = []
@@ -104,12 +104,12 @@ def create_html(top3, today):
 lines = [f"# 오늘의 데이트 추천 ({today})", "", "날씨와 취향을 반영해 추천했어요.", ""]
 for i, item in enumerate(top3, start=1):
     lines.append(f"**{i}. {item['name']}** ({item['type']}) — 점수 {item['score']}  \n이유: {item['reason']}")
-open("site/posts/today.md","w",encoding="utf-8").write("\n".join(lines))
+open("docs/posts/today.md","w",encoding="utf-8").write("\n".join(lines))
 print("built: site/posts/today.md")
 
 # Create HTML version
 html_content = create_html(top3, today)
-open("site/posts/today.html","w",encoding="utf-8").write(html_content)
+open("docs/posts/today.html","w",encoding="utf-8").write(html_content)
 print("built: site/posts/today.html")
 
 # Create index.html
@@ -162,5 +162,5 @@ index_html = """<!DOCTYPE html>
     </div>
 </body>
 </html>"""
-open("site/index.html","w",encoding="utf-8").write(index_html)
+open("docs/index.html","w",encoding="utf-8").write(index_html)
 print("built: site/index.html")
