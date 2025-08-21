@@ -33,7 +33,8 @@ def weather_fit(p, wx):
 
 def pref_fit(p, prof):
     s = 0.0
-    outdoor_pref = 1 - float(prof["indoor_pref"] or 0)  # 실외 선호
+    # 활동성 선호도로 실내/실외 선호도 대체
+    outdoor_pref = float(prof["active_level"] or 0.5)  # 활동성이 높을수록 실외 선호
     indoor = int(p["indoor"]) == 1
     s += (outdoor_pref if not indoor else (1-outdoor_pref)) * 0.2
     s += (int(p["romantic"])/5.0) * float(prof["romantic_pref"] or 0) * 0.3
