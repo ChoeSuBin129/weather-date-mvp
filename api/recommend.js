@@ -1,5 +1,61 @@
-// Vercel Serverless Function
 import { places } from '../data/places.js';
+
+export default function handler(req, res) {
+  // CORS 헤더 설정
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // OPTIONS 요청 처리
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const userPrefs = req.body;
+
+    // 점수 계산
+    const scoredPlaces = places.map(place => ({
+      ...place,
+      score: calculateMatchScore(place, userPrefs)
+    }));
+
+    // 상위 5개 장소 선택
+    const recommendations = scoredPlaces
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(place => ({
+        name: place.name,
+        type: place.type,
+        district: place.district,
+        score: Math.round(place.score * 100) / 100,
+        tags: place.tags,
+        indoor: place.indoor === 1,
+        budget_level: parseInt(place.budget_level)
+      }));
+
+    return res.status(200).json({
+      success: true,
+      recommendations,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+}
 
 function calculateMatchScore(place, prefs) {
   let score = 0;
@@ -55,46 +111,4 @@ function calculateMatchScore(place, prefs) {
   }
 
   return score;
-}
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const userPrefs = req.body;
-
-    // 점수 계산
-    const scoredPlaces = places.map(place => ({
-      ...place,
-      score: calculateMatchScore(place, userPrefs)
-    }));
-
-    // 상위 5개 장소 선택
-    const recommendations = scoredPlaces
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
-      .map(place => ({
-        name: place.name,
-        type: place.type,
-        district: place.district,
-        score: Math.round(place.score * 100) / 100,
-        tags: place.tags,
-        indoor: place.indoor === 1,
-        budget_level: parseInt(place.budget_level)
-      }));
-
-    return res.status(200).json({
-      success: true,
-      recommendations,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error'
-    });
-  }
 }
