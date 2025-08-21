@@ -37,10 +37,20 @@ def pref_fit(p, prof):
     outdoor_pref = float(prof["active_level"] or 0.5)  # 활동성이 높을수록 실외 선호
     indoor = int(p["indoor"]) == 1
     s += (outdoor_pref if not indoor else (1-outdoor_pref)) * 0.2
+
+    # 성격 유형 점수
+    if prof["personality_type"] == "extrovert" and p["extrovert_friendly"] == "yes":
+        s += 0.15
+    elif prof["personality_type"] == "introvert" and p["extrovert_friendly"] == "no":
+        s += 0.15
+
+    # 기존 선호도 점수
     s += (int(p["romantic"])/5.0) * float(prof["romantic_pref"] or 0) * 0.3
     s += (1 - abs((int(p["noise"])-1)/4.0 - float(prof["noise_pref"] or 0))) * 0.15
     s += (1 - abs(int(p["budget_level"]) - float(prof["budget_pref"] or 2))/4.0) * 0.1
     s += (int(p["walk_score"])/5.0) * min(1.0, float(prof["walk_limit_km"] or 1)/3.0) * 0.15
+
+    # 장소 유형 보너스
     if p["type"] in ["park","cafe","museum","trail","viewpoint","heritage","street","market"]:
         s += 0.1
     return clip(s, 0, 1)
