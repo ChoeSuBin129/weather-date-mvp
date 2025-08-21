@@ -1,0 +1,20 @@
+[
+  {
+    "name": "북악스카이웨이 전망대",
+    "type": "viewpoint",
+    "score": 0.489,
+    "reason": "취향 점수 높음"
+  },
+  {
+    "name": "망원한강공원",
+    "type": "park",
+    "score": 0.479,
+    "reason": "취향 점수 높음"
+  },
+  {
+    "name": "한옥마을 북촌",
+    "type": "heritage",
+    "score": 0.476,
+    "reason": "취향 점수 높음"
+  }
+]
