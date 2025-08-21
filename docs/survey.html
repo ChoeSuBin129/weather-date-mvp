@@ -177,12 +177,37 @@
             walk: document.getElementById('walk').value
         };
 
-        // 임시로 콘솔에 출력
-        console.log('설문 응답:', formData);
-        
-        // TODO: 서버로 데이터 전송 및 추천 결과 페이지로 이동
-        // 현재는 임시로 알림창 표시
-        alert('설문이 완료되었습니다. 추천 시스템 개발 중입니다!');
+        // 로딩 표시
+        document.querySelector('button[type="submit"]').disabled = true;
+        document.querySelector('button[type="submit"]').textContent = '추천 장소 찾는 중...';
+
+        // API 호출
+        fetch('http://localhost:5000/api/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 결과를 localStorage에 저장
+                localStorage.setItem('recommendations', JSON.stringify(data.recommendations));
+                // 결과 페이지로 이동
+                window.location.href = 'results.html';
+            } else {
+                alert('추천을 가져오는데 실패했습니다. 다시 시도해주세요.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('오류가 발생했습니다. 다시 시도해주세요.');
+        })
+        .finally(() => {
+            document.querySelector('button[type="submit"]').disabled = false;
+            document.querySelector('button[type="submit"]').textContent = '추천 받기';
+        });
     });
     </script>
 </body>

@@ -1,10 +1,16 @@
 name: Daily Build and Deploy
 on:
   schedule:
-    - cron: "0 23 * * *"   # KST 08:00
+    - cron: "0 23 * * *"   # 매일 08:00 KST
   workflow_dispatch: {}
   push:
     branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'scripts/**'
+      - 'data/**'
+      - '.github/workflows/**'
+      - 'requirements.txt'
 
 jobs:
   build:

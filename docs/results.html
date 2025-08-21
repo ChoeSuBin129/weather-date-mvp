@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>맞춤 데이트 코스 추천 결과</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .recommendation {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            transition: transform 0.2s;
+        }
+        .recommendation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .recommendation h2 {
+            color: #007bff;
+            margin: 0 0 10px 0;
+        }
+        .score {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .type {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #495057;
+            margin-right: 10px;
+        }
+        .district {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .tags {
+            margin-top: 10px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: #495057;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .budget {
+            margin-top: 5px;
+            color: #6c757d;
+        }
+        .budget::before {
+            content: "💰 ";
+        }
+        .indoor-outdoor::before {
+            content: "🏠 ";
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>맞춤 데이트 코스 추천 결과</h1>
+        <div id="recommendations"></div>
+        <a href="survey.html" class="back-link">← 다시 추천받기</a>
+    </div>
+
+    <script>
+    window.addEventListener('load', function() {
+        const recommendations = JSON.parse(localStorage.getItem('recommendations') || '[]');
+        const container = document.getElementById('recommendations');
+        
+        if (recommendations.length === 0) {
+            container.innerHTML = '<p>추천 결과가 없습니다. <a href="survey.html">설문으로 돌아가기</a></p>';
+            return;
+        }
+
+        const getBudgetText = (level) => {
+            switch(level) {
+                case 1: return "1만원 미만";
+                case 2: return "1-3만원";
+                case 3: return "3-5만원";
+                case 4: return "5만원 이상";
+                default: return "가격 정보 없음";
+            }
+        };
+
+        recommendations.forEach((place, index) => {
+            const div = document.createElement('div');
+            div.className = 'recommendation';
+            div.innerHTML = `
+                <h2>${index + 1}. ${place.name}
+                    <span class="score">매칭 점수: ${Math.round(place.score * 100)}%</span>
+                </h2>
+                <span class="type">${place.type}</span>
+                <span class="district">${place.district}</span>
+                <div class="indoor-outdoor">${place.indoor ? '실내' : '실외'} 장소</div>
+                <div class="budget">${getBudgetText(place.budget_level)}</div>
+                <div class="tags">
+                    ${place.tags.split(' ').map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    });
+    </script>
+</body>
+</html>
