@@ -26,8 +26,8 @@ const places = [
     "alcohol_available": "no",
     "extrovert_friendly": "no",
     "tags": "베이커리 감성 데이트"
-  },
-  // ... 나머지 장소 데이터는 그대로 유지
+  }
+  // ... 나머지 장소 데이터
 ];
 
 function calculateMatchScore(place, prefs) {
@@ -86,59 +86,55 @@ function calculateMatchScore(place, prefs) {
   return score;
 }
 
-module.exports = (req, res) => {
-  // CORS 헤더 설정
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  // OPTIONS 요청 처리
+module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'POST') {
+    try {
+      const userPrefs = req.body;
+      console.log('Received preferences:', userPrefs);  // 디버깅용 로그
 
-  try {
-    const userPrefs = req.body;
-
-    // 점수 계산
-    const scoredPlaces = places.map(place => ({
-      ...place,
-      score: calculateMatchScore(place, userPrefs)
-    }));
-
-    // 상위 5개 장소 선택
-    const recommendations = scoredPlaces
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
-      .map(place => ({
-        name: place.name,
-        type: place.type,
-        district: place.district,
-        score: Math.round(place.score * 100) / 100,
-        tags: place.tags,
-        indoor: place.indoor === 1,
-        budget_level: parseInt(place.budget_level)
+      const scoredPlaces = places.map(place => ({
+        ...place,
+        score: calculateMatchScore(place, userPrefs)
       }));
 
-    return res.status(200).json({
-      success: true,
-      recommendations,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error'
-    });
+      const recommendations = scoredPlaces
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5)
+        .map(place => ({
+          name: place.name,
+          type: place.type,
+          district: place.district,
+          score: Math.round(place.score * 100) / 100,
+          tags: place.tags,
+          indoor: place.indoor === 1,
+          budget_level: parseInt(place.budget_level)
+        }));
+
+      console.log('Sending recommendations:', recommendations);  // 디버깅용 로그
+
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.status(200).json({
+        success: true,
+        recommendations,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error processing request:', error);  // 디버깅용 로그
+      return res.status(500).json({
+        success: false,
+        error: 'Internal server error',
+        details: error.message
+      });
+    }
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 };
