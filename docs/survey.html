@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>데이트 코스 추천 설문</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        select, input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .note {
+            color: #666;
+            font-style: italic;
+            margin-top: 20px;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>데이트 코스 추천 설문</h1>
+        <form id="surveyForm">
+            <div class="form-group">
+                <label for="district">사는 지역</label>
+                <select id="district" name="district" required>
+                    <option value="">선택해주세요</option>
+                    <option value="강남구">강남구</option>
+                    <option value="강서구">강서구</option>
+                    <option value="광진구">광진구</option>
+                    <option value="마포구">마포구</option>
+                    <option value="서초구">서초구</option>
+                    <option value="성동구">성동구</option>
+                    <option value="송파구">송파구</option>
+                    <option value="용산구">용산구</option>
+                    <option value="종로구">종로구</option>
+                    <option value="중구">중구</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="personality">성격 유형</label>
+                <select id="personality" name="personality" required>
+                    <option value="">선택해주세요</option>
+                    <option value="extrovert">외향적 (사람 많은 곳 선호)</option>
+                    <option value="introvert">내향적 (조용한 곳 선호)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="drinking">음주 여부</label>
+                <select id="drinking" name="drinking" required>
+                    <option value="">선택해주세요</option>
+                    <option value="yes">음주 가능</option>
+                    <option value="no">음주 불가</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="active">활동성 선호도</label>
+                <input type="range" id="active" name="active" min="0" max="100" step="10">
+                <div class="range-labels">
+                    <span>조용한 활동 선호</span>
+                    <span>활동적인 것 선호</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="noise">소음 레벨 선호도</label>
+                <input type="range" id="noise" name="noise" min="0" max="100" step="10">
+                <div class="range-labels">
+                    <span>조용한 곳</span>
+                    <span>활기찬 곳</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="romantic">로맨틱한 분위기 선호도</label>
+                <input type="range" id="romantic" name="romantic" min="0" max="100" step="10">
+                <div class="range-labels">
+                    <span>캐주얼</span>
+                    <span>로맨틱</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="budget">선호하는 비용 수준</label>
+                <select id="budget" name="budget" required>
+                    <option value="">선택해주세요</option>
+                    <option value="1">저비용 (1만원 미만)</option>
+                    <option value="2">중저비용 (1-3만원)</option>
+                    <option value="3">중비용 (3-5만원)</option>
+                    <option value="4">고비용 (5만원 이상)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="walk">선호하는 최대 도보 거리</label>
+                <select id="walk" name="walk" required>
+                    <option value="">선택해주세요</option>
+                    <option value="1">1km 이내</option>
+                    <option value="2">2km 이내</option>
+                    <option value="3">3km 이내</option>
+                    <option value="5">5km 이내</option>
+                </select>
+            </div>
+
+            <button type="submit">추천 받기</button>
+        </form>
+        
+        <p class="note">입력하신 정보는 더 나은 추천을 위해서만 사용됩니다.</p>
+    </div>
+
+    <script>
+    document.getElementById('surveyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 폼 데이터 수집
+        const formData = {
+            district: document.getElementById('district').value,
+            personality: document.getElementById('personality').value,
+            drinking: document.getElementById('drinking').value,
+            active: document.getElementById('active').value / 100,
+            noise: document.getElementById('noise').value / 100,
+            romantic: document.getElementById('romantic').value / 100,
+            budget: document.getElementById('budget').value,
+            walk: document.getElementById('walk').value
+        };
+
+        // 임시로 콘솔에 출력
+        console.log('설문 응답:', formData);
+        
+        // TODO: 서버로 데이터 전송 및 추천 결과 페이지로 이동
+        // 현재는 임시로 알림창 표시
+        alert('설문이 완료되었습니다. 추천 시스템 개발 중입니다!');
+    });
+    </script>
+</body>
+</html>
