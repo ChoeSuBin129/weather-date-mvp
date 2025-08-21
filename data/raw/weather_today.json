@@ -1,9 +1,9 @@
 {
   "date": "2025-08-21",
   "weathercode": 51,
-  "temp_max": 31.1,
+  "temp_max": 31.3,
   "temp_min": 23.2,
   "precip_mm": 0.1,
-  "wind_max_mps": 4.9,
-  "cloud_mean": 47
+  "wind_max_mps": 5.2,
+  "cloud_mean": 45
 }
