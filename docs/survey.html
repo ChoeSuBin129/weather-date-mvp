@@ -521,25 +521,18 @@
         document.querySelector('button[type="submit"]').disabled = true;
         document.querySelector('button[type="submit"]').textContent = '추천 장소 찾는 중...';
 
-        // 점수 계산
-        const scoredPlaces = PLACES.map(place => ({
-            ...place,
-            score: calculateMatchScore(place, formData)
-        }));
-
-        // 상위 5개 장소 선택
-        const recommendations = scoredPlaces
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5)
-            .map(place => ({
-                name: place.name,
-                type: place.type,
-                district: place.district,
-                score: Math.round(place.score * 100) / 100,
-                tags: place.tags,
-                indoor: place.indoor === 1,
-                budget_level: parseInt(place.budget_level)
-            }));
+        // API 호출
+        fetch('/api/recommend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const recommendations = data.recommendations;
 
         // 결과 저장 및 페이지 이동
         localStorage.setItem('recommendations', JSON.stringify(recommendations));
