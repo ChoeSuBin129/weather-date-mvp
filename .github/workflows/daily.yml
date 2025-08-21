@@ -12,45 +12,59 @@ on:
       - '.github/workflows/**'
       - 'requirements.txt'
 
+# Allow only one concurrent deployment, skip runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
       pages: write
       id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          
-      - run: pip install -r requirements.txt
-      - run: python scripts/fetch_weather.py
-      - run: python scripts/score.py
-      - run: python scripts/build_today.py
-      
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate today's recommendations
+        run: |
+          python scripts/fetch_weather.py
+          python scripts/score.py
+          python scripts/build_today.py
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs'
-          
+          path: docs
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
-      - name: Commit & Push
+
+      - name: Commit updates
         run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
-          git add .
-          git commit -m "chore: daily build $(date -u +%F)" || echo "No changes"
+          git add data/raw/weather_today.json data/tmp_top3.json docs/
+          git commit -m "chore: daily build $(date -u +%F)" || echo "No changes to commit"
           git push
