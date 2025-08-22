@@ -1,4 +1,7 @@
 {
   "version": 2,
-  "outputDirectory": "docs"
+  "buildCommand": "echo 'No build required'",
+  "outputDirectory": "docs",
+  "framework": null,
+  "public": true
 }
