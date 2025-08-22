@@ -2,7 +2,30 @@ const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
 
+// HTTP URL을 HTTPS로 변환하는 함수
+function ensureHttps(url) {
+    if (!url) return 'https://via.placeholder.com/300x200';
+    if (url.startsWith('https://')) return url;
+    if (url.startsWith('http://')) return url.replace('http://', 'https://');
+    return url;
+}
+
 module.exports = async (req, res) => {
+    // CORS 설정
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    // OPTIONS 요청 처리
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
+    }
+
     try {
         const events = [];
         const eventsPath = path.join(process.cwd(), 'data', 'events_all.csv');
@@ -67,6 +90,13 @@ module.exports = async (req, res) => {
                 event.price && !event.price.includes('무료') && !event.price.includes('0원')
             );
         }
+
+        // 이미지 URL을 HTTPS로 변환
+        filteredEvents = filteredEvents.map(event => ({
+            ...event,
+            image: ensureHttps(event.image),
+            url: ensureHttps(event.url)
+        }));
 
         // 응답 반환
         res.json({
