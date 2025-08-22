@@ -1,9 +1,9 @@
 {
   "date": "2025-08-22",
   "weathercode": 3,
-  "temp_max": 31.5,
+  "temp_max": 31.2,
   "temp_min": 23.5,
   "precip_mm": 0.0,
   "wind_max_mps": 6.6,
-  "cloud_mean": 34
+  "cloud_mean": 36
 }
