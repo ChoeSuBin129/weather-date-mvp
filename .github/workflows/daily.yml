@@ -65,6 +65,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"
-          git add data/raw/weather_today.json data/tmp_top3.json docs/
+          git add data/raw/weather_today.json data/tmp_top3.json docs/posts/today.html docs/posts/today.md
           git commit -m "chore: daily build $(date -u +%F)" || echo "No changes to commit"
           git push
