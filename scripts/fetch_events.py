@@ -9,6 +9,37 @@ class KcisaEventFetcher:
         self.base_url = "https://api.kcisa.kr/openapi/CNV_060/request"
         self.events = []
 
+    def determine_event_type(self, title, description):
+        """제목과 설명을 기반으로 이벤트 타입을 결정"""
+        title_lower = title.lower() if title else ""
+        desc_lower = description.lower() if description else ""
+        
+        # 전시 관련 키워드
+        exhibition_keywords = ['전시', '展', '작품전', '기획전', '특별전', '아트', '미술', '갤러리']
+        
+        # 공연 관련 키워드
+        performance_keywords = ['공연', '연극', '뮤지컬', '콘서트', '오페라', '연주회', '페스티벌']
+        
+        # 축제 관련 키워드
+        festival_keywords = ['축제', '페스타', '페어', '마켓']
+        
+        # 전시 체크
+        for keyword in exhibition_keywords:
+            if keyword in title_lower or keyword in desc_lower:
+                return '전시'
+        
+        # 공연 체크
+        for keyword in performance_keywords:
+            if keyword in title_lower or keyword in desc_lower:
+                return '공연'
+        
+        # 축제 체크
+        for keyword in festival_keywords:
+            if keyword in title_lower or keyword in desc_lower:
+                return '축제'
+        
+        return '기타'  # 기본값
+
     def fetch_events(self):
         """공연/전시 정보 가져오기"""
         try:
@@ -54,9 +85,12 @@ class KcisaEventFetcher:
                     else:
                         start_date = end_date = None
                     
+                    title = get_text(item, 'title')
+                    description = get_text(item, 'description')
+                    
                     event = {
-                        'title': get_text(item, 'title'),
-                        'type': get_text(item, 'type'),
+                        'title': title,
+                        'type': self.determine_event_type(title, description),
                         'start_date': start_date,
                         'end_date': end_date,
                         'place': get_text(item, 'eventSite'),
@@ -64,13 +98,13 @@ class KcisaEventFetcher:
                         'contact': get_text(item, 'contactPoint'),
                         'url': get_text(item, 'url'),
                         'image': get_text(item, 'imageObject'),
-                        'description': get_text(item, 'description').replace('&lt;p&gt;', '').replace('&lt;/p&gt;', '')
+                        'description': description.replace('&lt;p&gt;', '').replace('&lt;/p&gt;', '')
                     }
                     
                     # 현재 진행 중인 이벤트만 추가
                     if self.is_ongoing(start_date, end_date):
                         self.events.append(event)
-                        print(f"추가됨: {event['title']} ({event['type'] if event['type'] else '기타'})")
+                        print(f"추가됨: {event['title']} ({event['type']})")
                 
                 print(f"현재까지 {len(self.events)}개의 이벤트가 수집되었습니다.")
                 
@@ -103,30 +137,6 @@ class KcisaEventFetcher:
         df.to_csv("data/events_all.csv", index=False, encoding='utf-8')
         print(f"\n전체 {len(df)}개의 이벤트를 data/events_all.csv에 저장했습니다.")
 
-    def filter_events(self, preferences):
-        """사용자 취향에 맞는 이벤트 필터링"""
-        if not self.events:
-            return []
-            
-        df = pd.DataFrame(self.events)
-        
-        # 타입 필터링
-        if 'preferred_categories' in preferences:
-            df = df[df['type'].isin(preferences['preferred_categories'])]
-            
-        # 장소 필터링
-        if 'preferred_locations' in preferences:
-            df = df[df['place'].str.contains('|'.join(preferences['preferred_locations']), na=False)]
-            
-        # 가격 필터링 (무료/유료)
-        if 'price_preference' in preferences:
-            if preferences['price_preference'] == '무료':
-                df = df[df['price'].str.contains('무료|0원', na=False)]
-            elif preferences['price_preference'] == '유료':
-                df = df[~df['price'].str.contains('무료|0원', na=False)]
-            
-        return df.to_dict('records')
-
 def main():
     # API 키 설정
     API_KEY = "dafb665b-5e08-4841-901d-22313f8a4931"
@@ -141,24 +151,6 @@ def main():
     # 이벤트 저장
     print("\n=== 수집한 이벤트 저장 중... ===")
     fetcher.save_events()
-    
-    # 테스트용 필터링
-    test_preferences = {
-        'preferred_categories': ['전시', '공연', '축제'],
-        'preferred_locations': ['서울', '경기'],
-        'price_preference': '무료'
-    }
-    
-    filtered_events = fetcher.filter_events(test_preferences)
-    print(f"\n=== 필터링된 이벤트 ({len(filtered_events)}개) ===")
-    for event in filtered_events[:5]:  # 상위 5개만 출력
-        print(f"\n제목: {event['title']}")
-        print(f"분류: {event['category']} ({event['realm']})")
-        print(f"장소: {event['place']} ({event['area']})")
-        print(f"기간: {event['start_date']} ~ {event['end_date']}")
-        print(f"가격: {event['price']}")
-        if event['url']:
-            print(f"상세정보: {event['url']}")
 
 if __name__ == "__main__":
     main()
