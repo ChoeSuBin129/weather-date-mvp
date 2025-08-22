@@ -41,6 +41,8 @@ module.exports = async (req, res) => {
 
         // 필터 파라미터 가져오기
         const { type, period, location, price } = req.query;
+        
+        console.log('Filter parameters:', { type, period, location, price });
 
         // 현재 날짜 계산
         const today = new Date();
@@ -55,6 +57,8 @@ module.exports = async (req, res) => {
         } else if (period === 'all') {
             endDate.setFullYear(today.getFullYear() + 1);
         }
+
+        console.log('Total events before filtering:', events.length);
 
         // 이벤트 필터링
         let filteredEvents = events.filter(event => {
@@ -72,23 +76,49 @@ module.exports = async (req, res) => {
             }
         });
 
+        console.log('Events after date filtering:', filteredEvents.length);
+
         // 추가 필터 적용
         if (type && type !== 'all') {
-            filteredEvents = filteredEvents.filter(event => event.type === type);
+            console.log('Filtering by type:', type);
+            const beforeCount = filteredEvents.length;
+            filteredEvents = filteredEvents.filter(event => {
+                const matches = event.type === type;
+                if (matches) console.log('Type match:', event.title, event.type);
+                return matches;
+            });
+            console.log(`Events after type filtering: ${filteredEvents.length} (removed ${beforeCount - filteredEvents.length})`);
         }
+
         if (location && location !== 'all') {
-            filteredEvents = filteredEvents.filter(event => 
-                event.place && event.place.includes(location)
-            );
+            console.log('Filtering by location:', location);
+            const beforeCount = filteredEvents.length;
+            filteredEvents = filteredEvents.filter(event => {
+                const matches = event.place && event.place.includes(location);
+                if (matches) console.log('Location match:', event.title, event.place);
+                return matches;
+            });
+            console.log(`Events after location filtering: ${filteredEvents.length} (removed ${beforeCount - filteredEvents.length})`);
         }
+
         if (price === 'free') {
-            filteredEvents = filteredEvents.filter(event => 
-                event.price && (event.price.includes('무료') || event.price.includes('0원'))
-            );
+            console.log('Filtering for free events');
+            const beforeCount = filteredEvents.length;
+            filteredEvents = filteredEvents.filter(event => {
+                const matches = event.price && (event.price.includes('무료') || event.price.includes('0원'));
+                if (matches) console.log('Free price match:', event.title, event.price);
+                return matches;
+            });
+            console.log(`Events after price filtering: ${filteredEvents.length} (removed ${beforeCount - filteredEvents.length})`);
         } else if (price === 'paid') {
-            filteredEvents = filteredEvents.filter(event => 
-                event.price && !event.price.includes('무료') && !event.price.includes('0원')
-            );
+            console.log('Filtering for paid events');
+            const beforeCount = filteredEvents.length;
+            filteredEvents = filteredEvents.filter(event => {
+                const matches = event.price && !event.price.includes('무료') && !event.price.includes('0원');
+                if (matches) console.log('Paid price match:', event.title, event.price);
+                return matches;
+            });
+            console.log(`Events after price filtering: ${filteredEvents.length} (removed ${beforeCount - filteredEvents.length})`);
         }
 
         // 이미지 URL을 HTTPS로 변환

@@ -342,7 +342,12 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                eventList.innerHTML = '<div class="no-events"><h3>오류가 발생했습니다</h3><p>잠시 후 다시 시도해주세요.</p></div>';
+                console.log('API Response:', error.response);
+                eventList.innerHTML = `<div class="no-events">
+                    <h3>오류가 발생했습니다</h3>
+                    <p>잠시 후 다시 시도해주세요.</p>
+                    <p style="color: #666; font-size: 0.9em;">오류 내용: ${error.message}</p>
+                </div>`;
             });
     }
 
