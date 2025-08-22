@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 import json, os
+import pandas as pd
 
 print("Creating posts directory...")
 os.makedirs("docs/posts", exist_ok=True)
@@ -14,7 +15,33 @@ if os.path.exists("data/tmp_top3.json"):
 else:
     print("No top3 data found!")
 
-def create_html(top3, today):
+# 이벤트 데이터 로드
+events = []
+if os.path.exists("data/events_all.csv"):
+    print("Loading events data...")
+    events_df = pd.read_csv("data/events_all.csv")
+    
+    # 현재 진행 중인 이벤트만 필터링
+    today_date = datetime.now().date()
+    events_df['start_date'] = pd.to_datetime(events_df['start_date']).dt.date
+    events_df['end_date'] = pd.to_datetime(events_df['end_date']).dt.date
+    
+    events_df = events_df[
+        (events_df['start_date'] <= today_date) & 
+        (events_df['end_date'] >= today_date)
+    ]
+    
+    # 점수 계산 (임시로 랜덤 점수 부여)
+    events_df['score'] = pd.Series([0.85, 0.82, 0.78, 0.75, 0.72] * 100)[:len(events_df)]
+    
+    # 상위 3개 이벤트 선택
+    top_events = events_df.nlargest(3, 'score')
+    events = top_events.to_dict('records')
+    print(f"Loaded {len(events)} events")
+else:
+    print("No events data found!")
+
+def create_html(top3, events, today):
     html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -258,25 +285,33 @@ def create_html(top3, today):
                 <p class="reason">{item['reason']}</p>
             </div>"""
 
-    # 전시/공연 탭 (임시 데이터)
     html += """
         </div>
 
         <!-- 전시/공연 탭 -->
-        <div id="events-tab" class="tab-content">
-            <div class="recommendation">
-                <h2>1. 광복 80주년 특별전</h2>
-                <span class="score">점수 95%</span>
-                <span class="type">전시</span>
-                <p class="reason">현재 진행 중인 특별 전시예요</p>
-            </div>
+        <div id="events-tab" class="tab-content">"""
 
+    # 실제 이벤트 데이터
+    if events:
+        for i, event in enumerate(events, start=1):
+            html += f"""
             <div class="recommendation">
-                <h2>2. 재즈 페스티벌 2025</h2>
-                <span class="score">점수 90%</span>
-                <span class="type">공연</span>
-                <p class="reason">오늘 저녁에 진행되는 특별 공연이에요</p>
-            </div>
+                <h2>{i}. {event['title']}</h2>
+                <span class="score">점수 {int(float(event['score'])*100)}%</span>
+                <span class="type">{event['type'] if event['type'] else '전시/공연'}</span>
+                <p class="reason">장소: {event['place'] if event['place'] else '미정'}</p>
+                <p class="reason">기간: {event['start_date']} ~ {event['end_date']}</p>
+                <p class="reason">가격: {event['price'] if event['price'] else '가격 정보 없음'}</p>
+                {'<p class="reason">상세정보: <a href="' + event['url'] + '" target="_blank">더 알아보기</a></p>' if event['url'] else ''}
+            </div>"""
+    else:
+        html += """
+            <div class="no-results">
+                <h3>오늘은 추천할 전시/공연이 없어요</h3>
+                <p>다음에 더 좋은 추천으로 찾아올게요!</p>
+            </div>"""
+
+    html += """
         </div>
 
         <a href="../index.html" class="back-link">메인으로 돌아가기</a>
@@ -311,6 +346,6 @@ open("docs/posts/today.md","w",encoding="utf-8").write("\n".join(lines))
 print("built: site/posts/today.md")
 
 # Create HTML version
-html_content = create_html(top3, today)
+html_content = create_html(top3, events, today)
 open("docs/posts/today.html","w",encoding="utf-8").write(html_content)
 print("built: site/posts/today.html")
