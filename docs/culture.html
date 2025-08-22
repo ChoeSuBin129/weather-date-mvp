@@ -312,8 +312,17 @@
         const price = document.getElementById('price').value;
 
         // API 호출
-        fetch(`/api/events?type=${type}&period=${period}&location=${location}&price=${price}`)
-            .then(response => response.json())
+        const apiUrl = `${window.location.origin}/api/events?type=${type}&period=${period}&location=${location}&price=${price}`;
+        console.log('Calling API:', apiUrl);
+        
+        fetch(apiUrl)
+            .then(response => {
+                console.log('API Response:', response);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (!data.success) {
                     throw new Error(data.error || '이벤트를 가져오는데 실패했습니다.');
