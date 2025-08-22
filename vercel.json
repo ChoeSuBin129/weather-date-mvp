@@ -1,11 +1,4 @@
 {
-  "buildCommand": "echo 'No build required'",
-  "outputDirectory": "docs",
-  "framework": null,
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  "version": 2,
+  "outputDirectory": "docs"
 }
