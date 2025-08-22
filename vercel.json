@@ -3,5 +3,10 @@
   "buildCommand": "echo 'No build required'",
   "outputDirectory": "docs",
   "framework": null,
-  "public": true
+  "public": true,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@3.0.0"
+    }
+  }
 }
