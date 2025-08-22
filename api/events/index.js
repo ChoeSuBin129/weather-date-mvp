@@ -94,8 +94,8 @@ module.exports = async (req, res) => {
             console.log('Filtering by location:', location);
             const beforeCount = filteredEvents.length;
             filteredEvents = filteredEvents.filter(event => {
-                const matches = event.place && event.place.includes(location);
-                if (matches) console.log('Location match:', event.title, event.place);
+                const matches = event.location === location;
+                if (matches) console.log('Location match:', event.title, event.location);
                 return matches;
             });
             console.log(`Events after location filtering: ${filteredEvents.length} (removed ${beforeCount - filteredEvents.length})`);
