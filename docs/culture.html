@@ -337,61 +337,29 @@
         }
         const endDateStr = formatDate(endDate);
 
-        // TODO: API 호출 및 데이터 처리
-        // 현재는 테스트 데이터를 사용합니다
-        setTimeout(() => {
-            const allEvents = [
-                {
-                    title: "광복 80주년 특별전",
-                    image: "https://via.placeholder.com/300x200",
-                    location: "서울시립미술관",
-                    period: "2025.08.01 ~ 2025.08.31",
-                    price: "무료"
-                },
-                {
-                    title: "재즈 페스티벌 2025",
-                    image: "https://via.placeholder.com/300x200",
-                    location: "올림픽공원",
-                    period: "2025.08.15 ~ 2025.08.16",
-                    price: "88,000원"
+        // API 호출
+        fetch(`/api/events?type=${type}&period=${period}&location=${location}&price=${price}`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || '이벤트를 가져오는데 실패했습니다.');
                 }
-                // 더 많은 테스트 데이터...
-            ];
+                return data.events;
 
-            // 현재 유효한 이벤트만 필터링
-            const validEvents = allEvents.filter(event => {
-                // 기본적으로 종료일이 오늘 이후인 이벤트만 포함
-                if (!isEventValid(event)) return false;
+            })
+            .then(events => {
 
-                // 선택된 기간에 따라 필터링
-                const [startDateStr, endDateStr] = event.period.split(' ~ ');
-                const startDate = parseDate(startDateStr);
-                const endDate = parseDate(endDateStr);
-
-                if (period === 'today') {
-                    return startDate <= today && today <= endDate;
-                } else {
-                    return startDate <= endDate;
-                }
-            }).filter(event => {
-                // 선택된 필터에 따라 추가 필터링
-                if (type !== 'all' && event.type !== type) return false;
-                if (location !== 'all' && !event.location.includes(location)) return false;
-                if (price === 'free' && !event.price.includes('무료')) return false;
-                if (price === 'paid' && event.price.includes('무료')) return false;
-                return true;
-            });
-
-            if (validEvents.length > 0) {
-                eventList.innerHTML = validEvents.map(event => `
+            if (events.length > 0) {
+                eventList.innerHTML = events.map(event => `
                     <div class="event-card">
-                        <img src="${event.image}" alt="${event.title}" class="event-image">
+                        <img src="${event.image || 'https://via.placeholder.com/300x200'}" alt="${event.title}" class="event-image">
                         <div class="event-info">
                             <h3 class="event-title">${event.title}</h3>
                             <div class="event-details">
-                                <p>📍 ${event.location}</p>
-                                <p>📅 ${event.period}</p>
-                                <p>💰 ${event.price}</p>
+                                <p>📍 ${event.place || '장소 미정'}</p>
+                                <p>📅 ${event.start_date} ~ ${event.end_date}</p>
+                                <p>💰 ${event.price || '가격 정보 없음'}</p>
+                                ${event.url ? `<p><a href="${event.url}" target="_blank">상세정보 보기</a></p>` : ''}
                             </div>
                         </div>
                     </div>
@@ -399,7 +367,11 @@
             } else {
                 eventList.innerHTML = '<div class="no-events"><h3>검색 결과가 없습니다</h3><p>다른 검색 조건을 시도해보세요.</p></div>';
             }
-        }, 1000);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            eventList.innerHTML = '<div class="no-events"><h3>오류가 발생했습니다</h3><p>잠시 후 다시 시도해주세요.</p></div>';
+        });
     }
 
     // 페이지 로드 시 자동 검색
