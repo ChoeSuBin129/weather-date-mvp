@@ -117,6 +117,33 @@ class KcisaEventFetcher:
 
         return None  # 지역을 특정할 수 없는 경우
 
+    def determine_price(self, title, description, charge):
+        """제목, 설명, 요금 정보를 기반으로 가격을 결정"""
+        # 모든 텍스트를 하나로 합침
+        all_text = ' '.join(filter(None, [
+            title or '',
+            description or '',
+            charge or ''
+        ])).lower()
+
+        # 무료 키워드 체크
+        free_keywords = ['무료', '무료관람', '무료입장', '무료입니다', '무료로', '0원']
+        for keyword in free_keywords:
+            if keyword in all_text:
+                return '무료'
+
+        # 유료 키워드 체크
+        paid_keywords = ['유료', '원', '만원', '천원', '유료입장', '입장료', '관람료', '예매']
+        for keyword in paid_keywords:
+            if keyword in all_text:
+                # 가격이 명시되어 있는 경우
+                price_match = re.search(r'(\d+[,\d]*)[원만천]', all_text)
+                if price_match:
+                    return f"{price_match.group(1)}원"
+                return '유료'  # 구체적인 가격이 없는 경우
+
+        return '가격 정보 없음'  # 가격 정보를 찾을 수 없는 경우
+
     def fetch_events(self):
         """공연/전시 정보 가져오기"""
         try:
@@ -166,6 +193,7 @@ class KcisaEventFetcher:
                     description = get_text(item, 'description')
                     place = get_text(item, 'eventSite')
                     contact = get_text(item, 'contactPoint')
+                    charge = get_text(item, 'charge')
                     
                     event = {
                         'title': title,
@@ -174,7 +202,7 @@ class KcisaEventFetcher:
                         'end_date': end_date,
                         'place': place,
                         'location': self.determine_location(title, place, contact, description),
-                        'price': get_text(item, 'charge'),
+                        'price': self.determine_price(title, description, charge),
                         'contact': contact,
                         'url': get_text(item, 'url'),
                         'image': get_text(item, 'imageObject'),
@@ -184,7 +212,7 @@ class KcisaEventFetcher:
                     # 현재 진행 중인 이벤트만 추가
                     if self.is_ongoing(start_date, end_date):
                         self.events.append(event)
-                        print(f"추가됨: {event['title']} ({event['type']}) - {event['location'] or '지역 미상'}")
+                        print(f"추가됨: {event['title']} ({event['type']}) - {event['location'] or '지역 미상'} - {event['price']}")
                 
                 print(f"현재까지 {len(self.events)}개의 이벤트가 수집되었습니다.")
                 
